@@ -19,6 +19,13 @@ CHAPTERS_IN_BOOKS = {
 class Bible:
     def __init__(self):
         self.filename = 'bible.txt'
+        self.max_length = 4000  # Maximum length for the chapter text
+
+    def clean_text(self, text):
+        # Remove excessive line breaks and extra whitespace
+        cleaned_lines = [line.strip() for line in text.split('\n') if line.strip()]
+        cleaned_text = ' '.join(cleaned_lines)
+        return cleaned_text
 
     def return_chapter(self, book_name, chapter_number):
         with open(self.filename, 'r', encoding='utf-8') as file:
@@ -48,6 +55,11 @@ class Bible:
                 chapter_lines = lines[start_index:]
             
             chapter_text = ''.join(chapter_lines).strip()
+            chapter_text = self.clean_text(chapter_text)  # Clean the chapter text
+            # Truncate the chapter text if it's too long
+            if len(chapter_text) > self.max_length:
+                chapter_text = chapter_text[:self.max_length]
+            
             return chapter_text
         else:
             return False
@@ -56,7 +68,13 @@ class Bible:
         book = random.choice(list(BibleBooks))
         total_chapters = CHAPTERS_IN_BOOKS[book.value]
         chapter_number = random.randint(1, total_chapters)
-        return book.value + '\n' + self.return_chapter(book.value, chapter_number)
-
-if __name__ == '__main__':
-    print(Bible().return_random_chapter())
+        chapter_text = self.return_chapter(book.value, chapter_number)
+        
+        if chapter_text:
+            # Ensure the final message is within the limit
+            final_message = f"{book.value}\n{chapter_text}"
+            if len(final_message) > self.max_length:
+                final_message = final_message[:self.max_length]
+            return final_message
+        else:
+            return "Chapter not found."
